@@ -9,6 +9,7 @@ interface EnvVars {
   USER_MS_HOST: string;
   PRODUCT_MS_PORT: number;
   PRODUCT_MS_HOST: string;
+  DATABASE_USER: string;
 }
 
 const envsSchema = joi
@@ -18,6 +19,7 @@ const envsSchema = joi
     USER_MS_HOST: joi.string().required(),
     PRODUCT_MS_PORT: joi.number().required(),
     PRODUCT_MS_HOST: joi.string().required(),
+    DATABASE_USER: joi.string().required(),
   })
   .unknown(true);
 
@@ -33,4 +35,5 @@ export const envs = {
   USER_MS_HOST: envVars.USER_MS_HOST,
   PRODUCT_MS_PORT: envVars.PRODUCT_MS_PORT,
   PRODUCT_MS_HOST: envVars.PRODUCT_MS_HOST,
+  DATABASE_USER: envVars.DATABASE_USER,
 };
