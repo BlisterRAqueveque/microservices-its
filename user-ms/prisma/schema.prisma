@@ -21,6 +21,9 @@ model User {
   avatars     Avatar[]
   avatarUsers AvatarUser[]
   age         Int?
+  deleted     Boolean      @default(false)
+  deletedAt   DateTime?
+  active      Boolean      @default(true)
 
   @@map("users")
 }
