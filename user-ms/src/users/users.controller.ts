@@ -1,4 +1,9 @@
-import { Controller, HttpException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -9,8 +14,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @MessagePattern({ user: 'create' })
-  create(@Payload() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(@Payload() { age, ...createUserDto }: CreateUserDto) {
+    return this.usersService
+      .create(createUserDto)
+      .catch((err) => new RpcException({ statusCode: 400, errors: err }));
   }
 
   @MessagePattern({ user: 'findAll' })

@@ -1,5 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -13,11 +12,11 @@ export class CreateUserDto {
   @IsOptional()
   lastName?: string;
 
-  @Type(() => Number)
-  @Transform(({ value }) => {
-    const transformedValue = +value;
-    return isNaN(transformedValue) ? undefined : transformedValue;
-  })
   @IsNumber()
+  @IsOptional()
   age?: number;
+
+  @IsDate()
+  @IsOptional()
+  createdAt?: Date;
 }
