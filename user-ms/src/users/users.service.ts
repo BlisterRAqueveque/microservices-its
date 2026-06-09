@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class UsersService {
@@ -10,11 +11,46 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const data: User = await this.prisma.user.create({ data: createUserDto });
-      return data;
+      await this.prisma.user.create({
+        data: createUserDto,
+      });
     } catch (error) {
-      console.log(error);
-      throw Error(JSON.stringify(error));
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2002':
+            throw new RpcException({
+              statusCode: 409,
+              message: 'Unique constraint violation',
+              errors: error.meta,
+            });
+
+          case 'P2003':
+            throw new RpcException({
+              statusCode: 400,
+              message: 'Foreign key constraint failed',
+              errors: error.meta,
+            });
+
+          case 'P2025':
+            throw new RpcException({
+              statusCode: 404,
+              message: 'Record not found',
+              errors: error.meta,
+            });
+
+          default:
+            throw new RpcException({
+              statusCode: 500,
+              message: 'Database error',
+              errors: error.meta,
+            });
+        }
+      }
+
+      throw new RpcException({
+        statusCode: 500,
+        message: 'Internal server error',
+      });
     }
   }
 

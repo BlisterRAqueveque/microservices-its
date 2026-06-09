@@ -8,10 +8,15 @@ import { RpcException } from '@nestjs/microservices';
 
 @Catch(RpcException)
 export class CustomErrors implements ExceptionFilter {
-  catch(
-    exception: { message: string; errorCode: number },
-    host: ArgumentsHost,
-  ) {
-    throw new HttpException(exception.message, exception.errorCode);
+  catch(exception: RpcException, host: ArgumentsHost) {
+    const error = exception.getError() as any;
+
+    throw new HttpException(
+      {
+        message: error.message,
+        errors: error.errors,
+      },
+      error.statusCode ?? 500,
+    );
   }
 }

@@ -15,9 +15,7 @@ export class UsersController {
 
   @MessagePattern({ user: 'create' })
   create(@Payload() { age, ...createUserDto }: CreateUserDto) {
-    return this.usersService
-      .create(createUserDto)
-      .catch((err) => new RpcException({ statusCode: 400, errors: err }));
+    return this.usersService.create(createUserDto);
   }
 
   @MessagePattern({ user: 'findAll' })
@@ -27,7 +25,6 @@ export class UsersController {
 
   @MessagePattern({ user: 'findOne' })
   findOne(@Payload() id: number) {
-    throw new RpcException({ message: 'User not found', codeError: 404 });
     return this.usersService.findOne(id);
   }
 
