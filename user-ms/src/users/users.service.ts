@@ -4,10 +4,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { RpcException } from '@nestjs/microservices';
+import { CatchErrorService } from 'src/errors/catch-error.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly catchErrorService: CatchErrorService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     try {
@@ -15,42 +19,7 @@ export class UsersService {
         data: createUserDto,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2002':
-            throw new RpcException({
-              statusCode: 409,
-              message: 'Unique constraint violation',
-              errors: error.meta,
-            });
-
-          case 'P2003':
-            throw new RpcException({
-              statusCode: 400,
-              message: 'Foreign key constraint failed',
-              errors: error.meta,
-            });
-
-          case 'P2025':
-            throw new RpcException({
-              statusCode: 404,
-              message: 'Record not found',
-              errors: error.meta,
-            });
-
-          default:
-            throw new RpcException({
-              statusCode: 500,
-              message: 'Database error',
-              errors: error.meta,
-            });
-        }
-      }
-
-      throw new RpcException({
-        statusCode: 500,
-        message: 'Internal server error',
-      });
+      this.catchErrorService.throwException(error, 'userService', 'create');
     }
   }
 
