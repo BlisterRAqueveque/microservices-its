@@ -23,10 +23,16 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return this.prisma.user.findMany({
-      where: { deleted: false },
-    });
+  async findAll() {
+    try {
+      const data = await this.prisma.user.findMany({
+        where: { deleted: false },
+      });
+
+      return data;
+    } catch (error) {
+      this.catchErrorService.throwException(error, 'userService', 'findAll');
+    }
   }
 
   findOne(id: number) {

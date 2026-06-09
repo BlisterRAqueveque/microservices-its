@@ -3,6 +3,7 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Version,
 } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { UsersService } from './users.service';
@@ -14,7 +15,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @MessagePattern({ user: 'create' })
-  create(@Payload() { age, ...createUserDto }: CreateUserDto) {
+  createV1(@Payload() { age, ...createUserDto }: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
