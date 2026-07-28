@@ -20,6 +20,7 @@ import {
   of,
   tap,
 } from 'rxjs';
+import { Owner } from 'src/common/decorators/owner.decorator';
 import { errorCustom } from 'src/common/helpers/error-custom';
 import { USER_MS } from 'src/config';
 
@@ -245,6 +246,11 @@ export class UsersController {
   @Patch(':id')
   update(@Param('id') id: string) {}
 
+  /**
+   * Para borrar mandar el id del registro
+   */
   @Delete(':id')
-  remove(@Param('id') id: string) {}
+  remove(@Param('id') id: string, @Owner() owner) {
+    return this.userClient.send({ user: 'remove' }, { id, owner });
+  }
 }

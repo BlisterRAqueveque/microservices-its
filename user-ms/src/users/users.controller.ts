@@ -1,14 +1,9 @@
-import {
-  BadRequestException,
-  Controller,
-  HttpException,
-  HttpStatus,
-  Version,
-} from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { UsersService } from './users.service';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersService } from './users.service';
+import { User } from '@prisma/client';
 
 @Controller()
 export class UsersController {
@@ -35,7 +30,7 @@ export class UsersController {
   }
 
   @MessagePattern({ user: 'remove' })
-  remove(@Payload() id: number) {
-    return this.usersService.remove(id);
+  remove(@Payload('id') id: number, @Payload('owner') owner: User) {
+    return this.usersService.remove(id, owner);
   }
 }
