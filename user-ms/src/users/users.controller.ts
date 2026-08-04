@@ -9,11 +9,6 @@ import { User } from '@prisma/client';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @MessagePattern({ user: 'create' })
-  createV1(@Payload() { age, ...createUserDto }: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @MessagePattern({ user: 'findAll' })
   findAll() {
     return this.usersService.findAll();

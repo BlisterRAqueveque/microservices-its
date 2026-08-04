@@ -1,6 +1,13 @@
-import { Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Public } from 'src/common/decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { catchError } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
@@ -8,8 +15,8 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  login() {
-    return 'JWT';
+  login(@Body() credenciales) {
+    return this.authService.login(credenciales);
   }
 
   @Public()

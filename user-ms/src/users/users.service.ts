@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { CatchErrorService } from 'src/errors/catch-error.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma, User } from '@prisma/client';
-import { RpcException } from '@nestjs/microservices';
-import { CatchErrorService } from 'src/errors/catch-error.service';
 
 @Injectable()
 export class UsersService {
@@ -12,16 +11,6 @@ export class UsersService {
     private readonly prisma: PrismaService,
     private readonly catchErrorService: CatchErrorService,
   ) {}
-
-  async create(createUserDto: CreateUserDto) {
-    try {
-      await this.prisma.user.create({
-        data: createUserDto,
-      });
-    } catch (error) {
-      this.catchErrorService.throwException(error, 'userService', 'create');
-    }
-  }
 
   async findAll() {
     try {
@@ -48,5 +37,10 @@ export class UsersService {
       where: { id },
       data: { deleted: true, deletedAt: new Date() },
     });
+  }
+
+  cambiarContraseña(owner: User, password: string) {
+    //
+    
   }
 }
