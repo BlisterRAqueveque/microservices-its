@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { envs, USER_MS } from 'src/config';
+import { MulterModule } from '@nestjs/platform-express';
+import { saveImagesToStorage } from 'src/common/helpers/image-storage';
+
+const { fileFilter, storage } = saveImagesToStorage('avatar');
 
 @Module({
   controllers: [UsersController],
@@ -13,9 +17,9 @@ import { envs, USER_MS } from 'src/config';
         options: { port: envs.USER_MS_PORT, host: envs.USER_MS_HOST },
       },
       {
-        name: 'AVATAR-MS',
+        name: 'LOGS-MS',
         transport: Transport.TCP,
-        options: { port: 3001, host: 'localhost' },
+        options: { port: 3002, host: 'localhost' },
       },
       {
         name: 'LOGS-MS',
@@ -23,11 +27,16 @@ import { envs, USER_MS } from 'src/config';
         options: { port: 3002, host: 'localhost' },
       },
       {
-        name: 'AUTH-MS',
+        name: 'ATTACH-MS',
         transport: Transport.TCP,
-        options: { port: 3003, host: 'localhost' },
+        options: { port: envs.ATTACH_MS_PORT, host: envs.ATTACH_MS_HOST },
       },
     ]),
+    MulterModule.register({
+      dest: './uploads',
+      fileFilter,
+      storage,
+    }),
   ],
 })
 export class UsersModule {}

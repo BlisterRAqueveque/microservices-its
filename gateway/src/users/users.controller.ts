@@ -8,9 +8,12 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
   Version,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   catchError,
   concatMap,
@@ -21,6 +24,7 @@ import {
   tap,
 } from 'rxjs';
 import { Owner } from 'src/common/decorators/owner.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 import { errorCustom } from 'src/common/helpers/error-custom';
 import { USER_MS } from 'src/config';
 
@@ -28,11 +32,28 @@ import { USER_MS } from 'src/config';
 export class UsersController {
   constructor(
     @Inject(USER_MS) private readonly userClient: ClientProxy,
-    @Inject('AVATAR-MS') private readonly authClient: ClientProxy,
     @Inject('LOGS-MS') private readonly logsClient: ClientProxy,
-    @Inject('AUTH-MS') private readonly avatarClient: ClientProxy,
   ) {}
 
+  @Public()
+  @Post('avatar')
+  // @Version('1')
+  @UseInterceptors(FileInterceptor('file'))
+  // @UseInterceptors(FilesInterceptor('files'))
+  async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Owner() user) {
+    // files.forEach((f) => console.log(f));
+
+    if (!file) throw new BadRequestException();
+    console.log(file.filename);
+
+    //TODO guardar la referencia en el microservicio de adjuntos
+    /**
+     * {
+     *  imageName:string => file?.filename
+     *  userId: string => user.id
+     * }
+     */
+  }
   // GET => https://mi-url.com.ar/api/v1/users/findAll/2/
   @Version('1')
   @Get('findOne/:id')
@@ -64,16 +85,17 @@ export class UsersController {
     console.log(data); // ms 500
 
     const user = await firstValueFrom(this.userClient.send({}, {})); // ms 200
-    const avatar = await firstValueFrom(this.avatarClient.send({}, {})); // ms 100
+    // const avatar = await firstValueFrom(this.avatarClient.send({}, {})); // ms 100
 
-    user.avatar = avatar.avatar; // ms 300
+    // user.avatar = avatar.avatar; // ms 300
 
     return forkJoin([
       this.userClient.send({}, {}), // ms 200
-      this.avatarClient.send({}, {}), // ms 100
+      // this.avatarClient.send({}, {}), // ms 100
     ]).pipe(
       map((data /** ms 200 */) =>
-        console.log((data[0].avatar = data[1].avatar)),
+        // console.log((data[0].avatar = data[1].avatar)),
+        {},
       ),
     );
 
@@ -89,18 +111,19 @@ export class UsersController {
       tap(() => {
         this.sendNotifications();
       }),
-      concatMap((user) =>
-        this.avatarClient.send({ avatar: 'findOne' }, user.id).pipe(
-          map((data: string | null) => ({
-            ...user,
-            avatar: data ?? 'https://avatar-defecto.com',
-          })),
-          catchError((err, data) => {
-            errorCustom(err);
-            return data;
-          }),
-        ),
-      ),
+      // concatMap(
+      //   (user) => {},
+      //   // this.avatarClient.send({ avatar: 'findOne' }, user.id).pipe(
+      //   //   map((data: string | null) => ({
+      //   //     ...user,
+      //   //     avatar: data ?? 'https://avatar-defecto.com',
+      //   //   })),
+      //   //   catchError((err, data) => {
+      //   //     errorCustom(err);
+      //   //     return data;
+      //   //   }),
+      //   // ),
+      // ),
       map((data) => {
         if (!data.avatar) data.avatar = '';
         return data;
@@ -140,16 +163,17 @@ export class UsersController {
     console.log(data); // ms 500
 
     const user = await firstValueFrom(this.userClient.send({}, {})); // ms 200
-    const avatar = await firstValueFrom(this.avatarClient.send({}, {})); // ms 100
+    // const avatar = await firstValueFrom(this.avatarClient.send({}, {})); // ms 100
 
-    user.avatar = avatar.avatar; // ms 300
+    // user.avatar = avatar.avatar; // ms 300
 
     return forkJoin([
       this.userClient.send({}, {}), // ms 200
-      this.avatarClient.send({}, {}), // ms 100
+      // this.avatarClient.send({}, {}), // ms 100
     ]).pipe(
-      map((data /** ms 200 */) =>
-        console.log((data[0].avatar = data[1].avatar)),
+      map(
+        (data /** ms 200 */) => {},
+        // console.log((data[0].avatar = data[1].avatar)),
       ),
     );
 
@@ -165,18 +189,18 @@ export class UsersController {
       tap(() => {
         this.sendNotifications();
       }),
-      concatMap((user) =>
-        this.avatarClient.send({ avatar: 'findOne' }, user.id).pipe(
-          map((data: string | null) => ({
-            ...user,
-            avatar: data ?? 'https://avatar-defecto.com',
-          })),
-          catchError((err, data) => {
-            errorCustom(err);
-            return data;
-          }),
-        ),
-      ),
+      // concatMap((user) =>
+      //   this.avatarClient.send({ avatar: 'findOne' }, user.id).pipe(
+      //     map((data: string | null) => ({
+      //       ...user,
+      //       avatar: data ?? 'https://avatar-defecto.com',
+      //     })),
+      //     catchError((err, data) => {
+      //       errorCustom(err);
+      //       return data;
+      //     }),
+      //   ),
+      // ),
       map((data) => {
         if (!data.avatar) data.avatar = '';
         return data;
